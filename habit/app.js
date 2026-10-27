@@ -1,0 +1,31 @@
+const KEY='habit-app-v1';
+const initialHabits=[
+  {id:'workout',name:'Тренировка',category:'Спорт',icon:'🏋️'},
+  {id:'read',name:'Прочитать 20 страниц',category:'Саморазвитие',icon:'📖'},
+  {id:'water',name:'Выпить 2 л воды',category:'Здоровье',icon:'💧'},
+  {id:'sleep',name:'Лечь до 23:00',category:'Сон',icon:'🌙'},
+  {id:'english',name:'Английский',category:'Учёба',icon:'💻'},
+  {id:'stretch',name:'Сделать зарядку',category:'Спорт',icon:'🤸'}
+];
+const icons={Спорт:'🏃',Учёба:'📚',Здоровье:'💧',Саморазвитие:'🧘',Хобби:'🎨',Сон:'😴'};
+const todayKey=()=>new Date().toLocaleDateString('sv-SE');
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{habits:initialHabits,checks:{},xp:0}}catch{return{habits:initialHabits,checks:{},xp:0}}}
+let state=load(); state.habits ||= initialHabits;state.checks ||= {};state.xp ||= 0;
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const $=s=>document.querySelector(s);
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dateLabel(){return new Intl.DateTimeFormat('ru-RU',{weekday:'long',day:'numeric',month:'long'}).format(new Date()).replace(/^./,x=>x.toUpperCase())}
+function dayChecks(key=todayKey()){return state.checks[key]||[]}
+function renderHabits(target=$('#habitGrid')){if(!target)return;target.innerHTML=state.habits.map(h=>{const done=dayChecks().includes(h.id);return `<article class="habit-card ${done?'done':''}" data-id="${escapeHtml(h.id)}" tabindex="0" role="checkbox" aria-checked="${done}"><span class="habit-icon">${h.icon||icons[h.category]||'✨'}</span><span class="habit-text"><strong>${escapeHtml(h.name)}</strong><small>${escapeHtml(h.category)}</small></span><span class="check">✓</span></article>`}).join('');target.querySelectorAll('.habit-card').forEach(card=>{card.addEventListener('click',()=>toggle(card.dataset.id));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(card.dataset.id)}})})}
+function toggle(id){const arr=dayChecks(),was=arr.includes(id);state.checks[todayKey()]=was?arr.filter(x=>x!==id):[...arr,id];if(!was){state.xp+=10;toast('Привычка выполнена · +10 XP')}else{state.xp=Math.max(0,state.xp-10);toast('Отметка отменена')}save();render()}
+function streak(){let count=0,d=new Date();for(let i=0;i<365;i++){const key=d.toLocaleDateString('sv-SE');if((state.checks[key]||[]).length){count++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1);if((state.checks[d.toLocaleDateString('sv-SE')]||[]).length){count++;d.setDate(d.getDate()-1)}else break}else break}return count}
+function renderBars(){let vals=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toLocaleDateString('sv-SE');const total=state.habits.length||1;vals.push({n:(state.checks[key]||[]).length/total,day:new Intl.DateTimeFormat('ru-RU',{weekday:'short'}).format(d).slice(0,2)})}const max=Math.max(.15,...vals.map(x=>x.n));$('#bars').innerHTML=vals.map(x=>`<div class="bar-col"><div class="bar" style="height:${Math.max(4,Math.round(x.n/max*94))}px" title="${Math.round(x.n*100)}%"></div><small>${x.day}</small></div>`).join('');const todayDone=dayChecks().length;const pct=state.habits.length?Math.round(todayDone/state.habits.length*100):0;$('#completion').textContent=pct+'%';$('#donut').style.background=`conic-gradient(var(--purple) ${pct}%,#282a33 ${pct}%)`}
+function renderLevel(){const level=Math.floor(state.xp/100)+1,remain=state.xp%100;$('#level').textContent=level+' lvl';$('#xp').textContent=remain;$('#nextXp').textContent='100';$('#xpBar').style.width=remain+'%'}
+function renderBadges(){const data=[['🏁','Первые шаги',state.xp>=10],['⚡','В ритме',streak()>=3],['💧','Водный баланс',dayChecks().includes('water')],['✦','Неделя силы',streak()>=7]];$('#badgeRow').innerHTML=data.map(([icon,label,yes])=>`<div class="badge ${yes?'':'locked'}"><div class="badge-icon">${icon}</div>${label}</div>`).join('')}
+function render(){renderHabits();renderLevel();renderBars();renderBadges();$('#streak').textContent=streak();$('#todayLabel').textContent=dateLabel()}
+let toastTimer;function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800)}
+const dialog=$('#habitDialog');$('#addHabit').addEventListener('click',()=>dialog.showModal());$('#habitForm').addEventListener('submit',e=>{e.preventDefault();const name=$('#habitName').value.trim(),category=$('#habitCategory').value;if(!name)return;state.habits.push({id:'h'+Date.now(),name,category,icon:icons[category]||'✨'});save();dialog.close();e.currentTarget.reset();render();toast('Привычка добавлена')});
+$('#startBtn').addEventListener('click',()=>$('#today').scrollIntoView({behavior:'smooth'}));
+document.querySelectorAll('[data-page]').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.page)));
+function showPage(page){document.querySelectorAll('.nav-link').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const panel=$('#pagePanel');if(page==='home'){panel.classList.add('hidden');$('#today').classList.remove('hidden');document.querySelector('.dashboard-grid').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});return}$('#today').classList.add('hidden');document.querySelector('.dashboard-grid').classList.add('hidden');panel.classList.remove('hidden');if(page==='habits'){panel.innerHTML='<h2>Твои привычки</h2><p class="muted">Отмечай выполненное и постепенно создавай свой ритм.</p><div class="habit-grid" id="pageHabits"></div>';renderHabits($('#pageHabits'))}else if(page==='stats'){panel.innerHTML=`<h2>Твоя статистика</h2><p class="muted">Прогресс начинается с каждого отмеченного дня.</p><div class="stats-summary"><div class="stat-tile"><strong>${state.xp}</strong>всего XP</div><div class="stat-tile"><strong>${streak()}</strong>дней текущей серии</div><div class="stat-tile"><strong>${dayChecks().length}/${state.habits.length}</strong>привычек сегодня</div></div>`}else{panel.innerHTML='<h2>Достижения</h2><p class="muted">Продолжай отмечать привычки, чтобы открывать награды.</p><div class="badge-row" id="allBadges"></div>';const row=$('#allBadges');row.innerHTML=$('#badgeRow').innerHTML;row.style.justifyContent='flex-start';row.style.maxWidth='560px'}}
+render();

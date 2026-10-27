@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0c11" />
+  <title>Habit — твой путь к лучшей версии</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient"></div>
+  <header class="topbar">
+    <a class="brand" href="#home"><span class="brand-mark">H</span> HABIT</a>
+    <nav aria-label="Основная навигация">
+      <button class="nav-link active" data-page="home">Главная</button>
+      <button class="nav-link" data-page="habits">Привычки</button>
+      <button class="nav-link" data-page="stats">Статистика</button>
+      <button class="nav-link" data-page="awards">Достижения</button>
+    </nav>
+    <div class="profile"><span class="online"></span><span>Мой профиль</span><div class="avatar">А</div></div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> МАЛЕНЬКИЕ ДЕЙСТВИЯ — БОЛЬШИЕ РЕЗУЛЬТАТЫ</p>
+        <h1>ЛУЧШАЯ ВЕРСИЯ<br><span>ТЕБЯ — ЭТО ПРИВЫЧКИ</span></h1>
+        <p class="intro">Формируй полезные привычки, отслеживай прогресс<br class="desktop"> и развивайся каждый день. Преврати рутину<br class="desktop"> в увлекательную игру.</p>
+        <button class="primary" id="startBtn">Начать сегодня <span>↗</span></button>
+        <div class="social-proof"><div class="faces"><i>М</i><i>К</i><i>А</i></div><span>Каждый день — шаг к себе</span></div>
+      </div>
+      <aside class="level-card">
+        <div class="card-top"><span>ТВОЙ УРОВЕНЬ</span><span class="spark">✦</span></div>
+        <div class="level-line"><strong id="level">1 lvl</strong><span><b id="xp">0</b> / <span id="nextXp">100</span> XP</span></div>
+        <div class="progress-track"><div id="xpBar"></div></div>
+        <div class="mascot" aria-hidden="true"><div class="moon">☾</div><div class="person">✦</div></div>
+        <p class="quote">«Постоянство сегодня —<br> результат завтра»</p>
+        <span class="level-caption">Твой прогресс начинается с малого</span>
+      </aside>
+    </section>
+
+    <section class="today-section" id="today">
+      <div class="section-heading"><div><h2>Сегодняшние привычки <span>↗</span></h2><p id="todayLabel" class="muted"></p></div><button class="text-button" id="addHabit">＋ Добавить привычку</button></div>
+      <div class="habit-grid" id="habitGrid"></div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel progress-panel"><div class="panel-heading"><div><h3>Твой прогресс</h3><p class="muted">Выполнение за последние 7 дней</p></div><span class="pill">Эта неделя</span></div><div class="chart-wrap"><div class="donut" id="donut"><div><strong id="completion">0%</strong><small>выполнено</small></div></div><div class="bars" id="bars"></div></div></article>
+      <article class="panel streak-panel"><div class="panel-heading"><div><h3>Текущий стрик</h3><p class="muted">Твоя серия достижений</p></div></div><div class="streak-number"><span>🔥</span><strong id="streak">0</strong><small>дней подряд</small></div><p class="streak-note">Каждый день — твой новый рекорд.</p></article>
+      <article class="panel awards-panel"><div class="panel-heading"><div><h3>Достижения <span>↗</span></h3><p class="muted">Открывай новые награды</p></div><button class="pill link-pill" data-page="awards">Все</button></div><div class="badge-row" id="badgeRow"></div></article>
+    </section>
+    <section class="page-panel hidden" id="pagePanel"></section>
+    <footer>HABIT <span>•</span> Маленький шаг — большое изменение</footer>
+  </main>
+
+  <dialog id="habitDialog"><form method="dialog" id="habitForm"><button class="close" aria-label="Закрыть">×</button><p class="eyebrow">НОВАЯ ЦЕЛЬ</p><h2>Добавь привычку</h2><label>Название<input id="habitName" maxlength="40" placeholder="Например, прогулка 20 минут" required></label><label>Категория<select id="habitCategory"><option>Здоровье</option><option>Спорт</option><option>Учёба</option><option>Саморазвитие</option><option>Хобби</option><option>Сон</option></select></label><button class="primary" value="default">Добавить <span>＋</span></button></form></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
